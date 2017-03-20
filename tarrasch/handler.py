@@ -2,8 +2,9 @@
 
 import time
 import json
+import random
 
-from chess import SQUARE_NAMES
+from chess import SQUARE_NAMES, Board
 from prettytable import PrettyTable
 
 from .board import TarraschBoard, TarraschNoBoardException
@@ -34,7 +35,15 @@ def _render(client, channel, board=None):
         client.rtm_send_message(channel, message)
 
 def _start_game(client, channel, white_user, black_user):
-    board = TarraschBoard(channel, white_user, black_user)
+    args = []
+    kwargs = {}
+    variant = STARTUP_STATE[channel]['variant']
+    if variant:
+        if variant == '960':
+            args += [chess.Board.from_chess960_pos(random.randint(0,959)).fen()]
+            kwargs["chess960"] = True
+
+    board = TarraschBoard(channel, white_user, black_user, *args, **kwargs)
     board.save()
     _render(client, channel, board=board)
 
@@ -63,7 +72,14 @@ def _handle_start(client, channel, user_name, rest):
     if board:
         return client.rtm_send_message(channel, 'A game is already going on in this channel between {} and {}'.format(board.white_user, board.black_user))
     STARTUP_STATE[channel] = {}
-    client.rtm_send_message(channel, "Let's play chess! I need two players to say `{0} claim white` or `{0} claim black`.".format(MP))
+
+    variant = rest[0].lower()
+    if variant in VARIANTS:
+        client.rtm_send_message(channel, "Let's play chess with variant {1}! I need two players to say `{0} claim white` or `{0} claim black`.".format(MP, variant))
+        STARTUP_STATE[channel]["variant"] = variant
+    else:
+        client.rtm_send_message(channel, "Let's play chess! I need two players to say `{0} claim white` or `{0} claim black`.".format(MP))
+        STARTUP_STATE[channel]["variant"] = None
 
 def _handle_board(client, channel, user_name, rest):
     """Show the current board state for the game in this channel."""
@@ -224,3 +240,5 @@ COMMANDS = {
     'leaderboard': _handle_leaderboard,
     'help': _handle_help,
 }
+
+VARIANTS = ['960', 'suicide', 'giveaway', 'atomic', 'koh', 'racing', 'horde', '3check', 'crazyhouse']
