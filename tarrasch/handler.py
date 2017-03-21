@@ -40,7 +40,7 @@ def _start_game(client, channel, white_user, black_user):
     variant = STARTUP_STATE[channel]['variant']
     if variant:
         if variant == '960':
-            args += [chess.Board.from_chess960_pos(random.randint(0,959)).fen()]
+            args += [Board.from_chess960_pos(random.randint(0,959)).fen()]
             kwargs["chess960"] = True
 
     board = TarraschBoard(channel, white_user, black_user, *args, **kwargs)
