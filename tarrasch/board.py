@@ -38,14 +38,6 @@ class TarraschBoard(Board):
         board.set_fen(payload['fen'])
         # Restore state variables
         board.move_stack = cPickle.loads(str(payload['stacks']['move']))
-        board.halfmove_clock_stack = cPickle.loads(str(payload['stacks']['halfmove_clock']))
-        board.captured_piece_stack = cPickle.loads(str(payload['stacks']['captured_piece']))
-        board.castling_right_stack = cPickle.loads(str(payload['stacks']['castling_right']))
-        board.ep_square_stack = cPickle.loads(str(payload['stacks']['ep_square']))
-        board.attacks_valid_stack = cPickle.loads(str(payload['stacks']['attacks_valid']))
-        board.attacks_from_stack = cPickle.loads(str(payload['stacks']['attacks_from']))
-        board.attacks_to_stack = cPickle.loads(str(payload['stacks']['attacks_to']))
-        board.transpositions = cPickle.loads(str(payload['transpositions']))
         return board
 
     def save(self, last_move_time=None):
@@ -53,15 +45,7 @@ class TarraschBoard(Board):
                    'white_user': self.white_user,
                    'black_user': self.black_user,
                    'last_move_time': last_move_time or self.last_move_time,
-                   'stacks': {'move': cPickle.dumps(self.move_stack),
-                              'halfmove_clock': cPickle.dumps(self.halfmove_clock_stack),
-                              'captured_piece': cPickle.dumps(self.captured_piece_stack),
-                              'castling_right': cPickle.dumps(self.castling_right_stack),
-                              'ep_square': cPickle.dumps(self.ep_square_stack),
-                              'attacks_valid': cPickle.dumps(self.attacks_valid_stack),
-                              'attacks_from': cPickle.dumps(self.attacks_from_stack),
-                              'attacks_to': cPickle.dumps(self.attacks_to_stack)},
-                   'transpositions': cPickle.dumps(self.transpositions)}
+                   'stacks': {'move': cPickle.dumps(self.move_stack)}}
         db.set(self.channel, json.dumps(payload))
 
     def kill(self):

@@ -73,7 +73,8 @@ def _handle_start(client, channel, user_name, rest):
         return client.rtm_send_message(channel, 'A game is already going on in this channel between {} and {}'.format(board.white_user, board.black_user))
     STARTUP_STATE[channel] = {}
 
-    variant = rest[0].lower()
+    variant = rest[0].lower() if rest else None
+
     if variant in VARIANTS:
         client.rtm_send_message(channel, "Let's play chess with variant {1}! I need two players to say `{0} claim white` or `{0} claim black`.".format(MP, variant))
         STARTUP_STATE[channel]["variant"] = variant
